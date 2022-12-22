@@ -1,0 +1,22 @@
+1. how many ports are possible in a single system- 65,535 
+2. Which ports are priviledged: 0 to 1023
+3. Which ports expect registration:  1024 to 49151
+4. Which are free for anyone to use: 49152 to 65535
+5. What are the port numbers for the following
+1. HTTP 80
+2. HTTPS 443
+3. FTP: 20
+4. DNS 53
+5. SMTP 25 / encrypted 537
+6. POP3 110 / encrypted 995
+7. IMAP 143
+6. LIST all the VERBS of HTTP Protocol
+- HEAD
+- CONNECT
+- OPTIONS
+- TRACE
+- POST
+- PUT
+- GET
+- PATCH
+- DELETE
