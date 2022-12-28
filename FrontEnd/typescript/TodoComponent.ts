@@ -1,11 +1,14 @@
+import { ITodoInterface } from "./ITodoInterface";
 import { Todo } from "./Todo";
-import { TodoService } from "./TodoService";
 export class TodoComponent {
   private todoList: Todo[] = [];
 
-  private todoService = new TodoService();
+  private todoService: ITodoInterface;
+  private itemsList: HTMLUListElement;
+  private input: HTMLInputElement;
+  constructor(selector: string, service: ITodoInterface) {
+    this.todoService = service;
 
-  constructor(selector: string) {
     const div = document.createElement("div");
     div.innerText = "Hello";
     const root = document.querySelector(selector);
@@ -18,39 +21,56 @@ export class TodoComponent {
   <ul id="items-list"></ul>`;
 
     root?.insertAdjacentHTML("beforeend", template);
-    const itemsList = document.querySelector("#items-list") as HTMLUListElement;
+    this.itemsList = document.querySelector("#items-list") as HTMLUListElement;
 
     const addButton = document.querySelector(
       "#add-button"
     ) as HTMLButtonElement;
-    const input = document.querySelector("#todo-input") as HTMLInputElement;
+    this.input = document.querySelector("#todo-input") as HTMLInputElement;
 
     // this.todoList = JSON.parse(window.localStorage.getItem("todoList") ?? "[]");
 
-    this.todoList = this.todoService.getAllTodos();
+    this.fetchAndAddTodo();
+
+    addButton?.addEventListener("click", this.addTodo);
+  }
+  async fetchAndAddTodo() {
+    this.todoList = await this.todoService.getAllTodos();
     this.todoList.forEach((item) => {
-      const listItem = `<li id="todo-${item.todoKey}">${item.todoItem} <button>X</button></li>`;
-      itemsList.insertAdjacentHTML("beforeend", listItem);
+      const listItem = `<li id="todo-${item.todoKey}">${item.todoItem} <button>X</button></li> <button id="edit">edit</button>`;
+      this.itemsList.insertAdjacentHTML("beforeend", listItem);
       const liButton = document.querySelector(`#todo-${item.todoKey} > button`);
+      const editButton = document.querySelector(
+        `#todo-${item.todoKey} > #edit`
+      );
+      editButton?.addEventListener("click", () => {
+        this.todoService.updateTodo(item.todoKey, "updated");
+        location.reload();
+      });
       liButton?.addEventListener("click", () => {
         this.todoService.deleteTodo(item.todoKey);
+        location.reload();
       });
     });
-
-    const addTodo = () => {
-      const todo = this.todoService.createTodo(input?.value);
-      this.todoList.push(todo);
-
-      const item = `<li id="todo-${todo.todoKey}">${input?.value} <button>X</button></li>`;
-      input.value = "";
-      itemsList?.insertAdjacentHTML("beforeend", item);
-
-      const liButton = document.querySelector(`#todo-${todo.todoKey} > button`);
-      liButton?.addEventListener("click", () => {
-        this.todoService.deleteTodo(todo.todoKey);
-      });
-    };
-
-    addButton?.addEventListener("click", addTodo);
+    // location.reload();
   }
+  addTodo = async () => {
+    const todo = await this.todoService.createTodo(this.input?.value);
+    this.todoList.push(todo);
+    const item = `<li id="todo-${todo.todoKey}">${this.input?.value} <button>X</button> <button id="edit">edit</button></li> `;
+    this.input.value = "";
+    this.itemsList?.insertAdjacentHTML("beforeend", item);
+
+    const liButton = document.querySelector(`#todo-${todo.todoKey} > button`);
+    const editButton = document.querySelector(`#todo-${todo.todoKey} > #edit`);
+
+    editButton?.addEventListener("click", () => {
+      this.todoService.updateTodo(todo.todoKey, "updated");
+      location.reload();
+    });
+    liButton?.addEventListener("click", () => {
+      this.todoService.deleteTodo(todo.todoKey);
+      location.reload();
+    });
+  };
 }
