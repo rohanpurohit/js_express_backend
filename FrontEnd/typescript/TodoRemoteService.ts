@@ -36,7 +36,8 @@ export class TodoRemoteService implements ITodoInterface {
   }
 
   async getTodo(todoKey: number): Promise<Todo | undefined> {
-    const todo: Todo = await axios.get(this.url + "todo" + "/" + todoKey);
+    const res = await axios.get(this.url + "todo" + "/" + todoKey);
+    const todo: Todo = await res.data;
     return todo;
   }
 
